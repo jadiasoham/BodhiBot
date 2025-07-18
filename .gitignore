@@ -19,4 +19,8 @@ venv/
 *.yaml
 *.yml
 
-Miniconda*
+# Don't track installers or large binaries
+Miniconda*.sh
+*.tar.gz
+*.zip
+*.whl
