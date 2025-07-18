@@ -1,11 +1,12 @@
 import os
 import sys
 from transformers import AutoModelForCausalLM, AutoTokenizer
-# from peft import PeftModel, PeftConfig
+from peft import PeftModel
+import argparse
 
-def download_qwen_model(model_name: str, save_path: str):
+def download_model(model_name: str, save_path: str, adapter_id: str = ""):
     """
-    Downloads the specified Qwen model and its tokenizer to the given path.
+    Downloads the specified model and its tokenizer to the given path.
     It handles creating the directory if it doesn't exist.
 
     Args:
@@ -13,14 +14,17 @@ def download_qwen_model(model_name: str, save_path: str):
                           (e.g., "Qwen/Qwen2.5-Coder-7b-Instruct").
         save_path (str): The local directory path where the model and tokenizer
                          will be saved.
+        adapter_id (str): If provided, this adapter will be downloaded as well
     """
+    save_path = os.path.join(save_path, model_name)
+
     if not os.path.exists(save_path):
         try:
             os.makedirs(save_path, exist_ok=True)
             print(f"Created directory: {save_path}")
         except OSError as e:
             print(f"Error creating directory {save_path}: {e}")
-            sys.exit(1) # Exit if directory cannot be created
+            sys.exit(1)
 
     print(f"Attempting to download model: {model_name}...")
     print(f"Target download path: {save_path}")
@@ -29,7 +33,7 @@ def download_qwen_model(model_name: str, save_path: str):
         # --- Download Tokenizer ---
         print("\n--- Downloading Tokenizer ---")
         tokenizer = AutoTokenizer.from_pretrained(model_name)
-        tokenizer_path = os.path.join(save_path, "tokenizer")
+        tokenizer_path = os.path.abspath(save_path)
         tokenizer.save_pretrained(tokenizer_path)
         print(f"Tokenizer downloaded and saved to: {tokenizer_path}")
 
@@ -39,32 +43,21 @@ def download_qwen_model(model_name: str, save_path: str):
             model_name,
             trust_remote_code=True,
         )
-        model_dir_path = os.path.join(save_path, "model")
+        model_dir_path = os.path.abspath(save_path)
         model.save_pretrained(model_dir_path)
         print(f"Model downloaded and saved to: {model_dir_path}")
 
         # --- Adapter Handling (Optional) ---
-        # If you have a separate PEFT (Parameter-Efficient Fine-Tuning) adapter
-        # (e.g., LoRA weights) that needs to be loaded on top of this base model,
-        # you would typically do it here.
-        # Example:
-        # adapter_id = "your/specific-adapter-repo-id" # Replace with the actual Hugging Face ID or local path of your adapter
-        # try:
-        #     print(f"\n--- Attempting to load separate adapter: {adapter_id} ---")
-        #     # Load the adapter weights
-        #     adapter_model = PeftModel.from_pretrained(model, adapter_id)
-        #     adapter_path = os.path.join(save_path, "adapter")
-        #     adapter_model.save_pretrained(adapter_path)
-        #     print(f"Adapter downloaded and saved to: {adapter_path}")
-        #
-        #     # If you want to merge the adapter weights directly into the base model
-        #     # (making it a single, larger model), you can call:
-        #     # model = adapter_model.merge_and_unload()
-        #     # print("Adapter merged into the base model.")
-        #
-        # except Exception as e:
-        #     print(f"Could not load separate adapter from {adapter_id}. It might not exist or an error occurred: {e}")
-        #     print("If you don't have a separate adapter, you can ignore this message.")
+        if adapter_id:
+            try:
+                print(f"\n--- Attempting to load separate adapter: {adapter_id} ---")
+                # Load the adapter weights
+                adapter_model = PeftModel.from_pretrained(model, adapter_id)
+                adapter_path = os.path.join(save_path, "adapter")
+                adapter_model.save_pretrained(adapter_path)
+                print(f"Adapter downloaded and saved to: {adapter_path}")            
+            except Exception as e:
+                print(f"Could not load separate adapter from {adapter_id}. It might not exist or an error occurred: {e}")
         # -----------------------------------
 
         print(f"\nSuccessfully downloaded '{model_name}' to '{save_path}'")
@@ -76,14 +69,61 @@ def download_qwen_model(model_name: str, save_path: str):
         print(f"1. Is the model name '{model_name}' correct on Hugging Face?")
         print("2. Do you have an active internet connection?")
         print("3. Have you installed the necessary libraries? (e.g., `pip install transformers accelerate peft`)")
+        print("4. Models can be very large, make sure you have sufficient space on your disk. (Typically > 15 GB)")
         sys.exit(1) # Exit with an error code
 
 if __name__ == "__main__":
-    # Define the model ID you want to download
-    MODEL_ID = "Qwen/Qwen2.5-Coder-7b-Instruct"
+    parser = argparse.ArgumentParser(description="Downloads the given model from Hugging Face with its tokenizer and optionally adapters.")
+    parser.add_argument(
+        '--model-name', 
+        type=str, 
+        help="The namespace and name of the model (e.g., Qwen/Qwen2.5-Coder-7b-Instruct)"
+    )
+    parser.add_argument(
+        '--savepath', 
+        type=str, 
+        help="The directory where the model will be saved"
+    )
+    parser.add_argument(
+        '--adapter-id', 
+        type=str, 
+        default="", 
+        help="(Optional) The adapter ID from Hugging Face, if applicable"
+    )
+    parser.add_argument(
+        '--skip-if-exists', 
+        action='store_true',
+        help="Skips download if model/tokenizer already exist in savepath"
+    )
 
-    DOWNLOAD_PATH = os.path.join("/home/soham/Downloads/Qwen", "Qwen2.5-Coder-7b-Instruct")
+    args = parser.parse_args()
 
-    print("--- Starting Qwen Model Download Script ---")
-    download_qwen_model(MODEL_ID, DOWNLOAD_PATH)
-    print("\n--- Download script finished ---")
+    # Interactive fallback for missing args
+    model_id = args.model_name or input("Enter model name (e.g., Qwen/Qwen2.5-Coder-7b-Instruct):\n> ").strip()
+    download_path = args.savepath or input("Enter the local directory to save the model:\n> ").strip()
+    
+    # Adapter is optional; prompt only if completely missing
+    if args.adapter_id == "":
+        adapter = input("Enter adapter ID [optional]:\n> ").strip()
+    else:
+        adapter = args.adapter_id
+
+    skip_existing = args.skip_if_exists
+    full_path = os.path.join(download_path, model_id)
+
+    # Check for existing model/tokenizer/adapter
+    if skip_existing and os.path.exists(full_path):
+        files = os.listdir(full_path)
+        has_model = any(f.endswith(".bin") or f.endswith(".safetensors") for f in files)
+        has_tokenizer = os.path.exists(os.path.join(full_path, "tokenizer_config.json"))
+
+        adapter_ok = True
+        if adapter:
+            adapter_ok = os.path.exists(os.path.join(full_path, "adapter"))
+
+        if has_model and has_tokenizer and adapter_ok:
+            print(f"\nModel, tokenizer{' and adapter' if adapter else ''} already exist at '{full_path}'. Skipping download.")
+            sys.exit(0)
+
+    # Proceed with download
+    download_model(model_id, download_path, adapter)
