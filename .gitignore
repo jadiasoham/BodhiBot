@@ -18,3 +18,5 @@ venv/
 *.condarc
 *.yaml
 *.yml
+
+Miniconda*
