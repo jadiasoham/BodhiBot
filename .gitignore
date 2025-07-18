@@ -1,0 +1,20 @@
+# 🐍 Python artifacts
+__pycache__/
+*.py[cod]
+*.so
+*.pyd
+*.pyo
+
+# 🔁 Virtual environments
+env/
+venv/
+.venv/
+*env*/
+.env/
+.python-version
+
+# ⚙️ Conda environment files
+*.conda
+*.condarc
+*.yaml
+*.yml

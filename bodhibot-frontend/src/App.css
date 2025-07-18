@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Define Colors */
+:root {
+  --primary-color: #0A192F;       /* Dark Navy Blue */
+  --secondary-color: #FF5C33;     /* Bright Orange-Red */
+  --accent-color: #66FCF1;        /* Teal Accent */
+  --light-color: #F8F9FA;         /* Light Background */
+  --dark-color: #333333;          /* Dark Gray Text */
+  --white-color: #FFFFFF;         /* Pure White */
+}
+
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--light-color); /* Using the light background color */
+  color: var(--dark-color);           /* Using the dark text color */
+}
+
+.top-navbar {
+  background-color: var(--primary-color); /* Dark navy blue navbar */
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eee; /* You might want to adjust this border color */
+}
+
+.app-title {
+  font-size: 20px;
+  font-weight: bold;
+  text-decoration: none;
+  color: var(--accent-color);       /* Teal for the title */
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.login-button,
+.signup-button {
+  text-decoration: none;
+  color: var(--light-color);       /* Light text on buttons */
+  padding: 8px 12px;
+  border: 1px solid var(--secondary-color); /* Orange-red border */
+  border-radius: 5px;
+  background-color: var(--secondary-color); /* Orange-red background */
+  cursor: pointer;
+}
+
+.login-button:hover,
+.signup-button:hover {
+  background-color: color-mix(in srgb, var(--secondary-color) 80%, white); /* Slightly lighter on hover */
+}
+
+.cover-image-container {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.cover-image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.content-container {
+  flex-grow: 1;
+  padding: 20px;
+}
+
+.app-footer {
+  background-color: var(--primary-color); /* Dark navy blue footer */
+  padding: 10px 20px;
+  text-align: center;
+  color: var(--light-color);           /* Light text on footer */
+  border-top: 1px solid #eee;       /* You might want to adjust this border color */
+}

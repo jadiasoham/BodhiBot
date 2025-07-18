@@ -1,0 +1,72 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.manifest
+*.spec
+
+# Django specific
+*.log
+*.pot
+*.pyc
+db.sqlite3
+media/
+staticfiles/
+.env
+.env.*
+
+# VS Code
+.vscode/
+
+# Pipenv
+Pipfile.lock
+
+# pytest
+.cache/
+.pytest_cache/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+
+# Docker
+*.pid
+*.seed
+*.bak
+*.swp
+*.swo
+*.tmp
+
+# macOS
+.DS_Store
+
+# Linux
+*.swp
+*~
+
+# IDEs
+.idea/
+*.iml
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Backup files
+*.bak
+*.orig
+*.old
+
+# System files
+Thumbs.db
+ehthumbs.db
