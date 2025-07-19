@@ -78,6 +78,9 @@ AUTH_USER_MODEL = 'users.User'
 
 ROOT_URLCONF = 'bodhibot.urls'
 
+# Pagesize:
+DEFAULT_PAGE_SIZE = 20
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
