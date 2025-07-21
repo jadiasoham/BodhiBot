@@ -11,7 +11,12 @@ class UserChatView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        chats = Chat.objects.filter(user= request.user).order_by('-last_message')
+        try:
+            chats = Chat.objects.filter(user= request.user).order_by('-last_message')
+        except Exception as e:
+            return Response({"error": e}, status= status.HTTP_500_INTERNAL_SERVER_ERROR)
+        if not chats.exists():
+            return Response({"message": "no chats to load"}, status= status.HTTP_404_NOT_FOUND)
         serializer = ChatSerializer(chats, many= True)
         return Response(serializer.data, status= status.HTTP_202_ACCEPTED)
     
