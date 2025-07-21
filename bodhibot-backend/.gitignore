@@ -21,6 +21,10 @@ staticfiles/
 .env
 .env.*
 
+# Migration Files
+migrations/
+!migrations/__init__.py
+
 # VS Code
 .vscode/
 
