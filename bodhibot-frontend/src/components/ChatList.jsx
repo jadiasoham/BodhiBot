@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const ChatList = ({ onChatSelect }) => {
+const baseUrl = process.env.REACT_APP_API_BASE_URL;
+
+const ChatList = ({ onChatSelect, onChatAdd }) => {
   const [chats, setChats] = useState([]);
 
   useEffect(() => {
-    axios.get('/api/chats/')
+    axios.get(`${baseUrl}chats/my-chats/`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+      }
+    })
       .then(res => setChats(res.data))
       .catch(err => console.error("Failed to load chats", err));
   }, []);
@@ -14,6 +20,10 @@ const ChatList = ({ onChatSelect }) => {
     <div className="w-full sm:w-1/3 p-4 border-r">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold">Your Chats</h2>
+        <button onClick={() => {
+          const name = prompt("Set a name: ");
+          name ? onChatAdd(name) : onChatAdd("Unnamed Chat")
+        }}><i className="fa fa-plus" aria-hidden="true"></i>New</button>
       </div>
       <ul>
         {chats.map(chat => (
