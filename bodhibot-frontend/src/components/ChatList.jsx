@@ -22,7 +22,8 @@ const ChatList = ({ onChatSelect, onChatAdd }) => {
         <h2 className="text-xl font-bold">Your Chats</h2>
         <button onClick={() => {
           const name = prompt("Set a name: ");
-          name ? onChatAdd(name) : onChatAdd("Unnamed Chat")
+          name ? onChatAdd(name) : onChatAdd("UnnamedChat");
+          name ? setChats((prev) => [...prev, name]) : setChats((prev) => [...prev, "UnnamedChat"]);
         }}><i className="fa fa-plus" aria-hidden="true"></i>New</button>
       </div>
       <ul>

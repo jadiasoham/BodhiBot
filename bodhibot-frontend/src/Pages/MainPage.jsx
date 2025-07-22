@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import ChatList from '../components/ChatList';
 import ChatView from '../components/ChatView';
 import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 
 const baseUrl = process.env.REACT_APP_API_BASE_URL;
 
-const MainPage = (logout) => {
+const MainPage = () => {
+  const { logout } = useAuth();
   const [chatList, setChatList] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
 
@@ -20,6 +22,7 @@ const MainPage = (logout) => {
       });
 
       const newChat = response.data;
+      setChatList((prev) => [...prev, newChat]);
       setSelectedChat(newChat);
     } catch (err) {
       console.error("Error creating new chat: ", err);

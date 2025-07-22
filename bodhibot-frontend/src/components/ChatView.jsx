@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
+import { useAuth } from '../context/AuthContext';
 // import remarkGfm from 'remark-gfm';
 // import rehypeRaw from 'rehype-raw';
 
@@ -12,6 +13,7 @@ const ChatView = ({ chatName }) => {
   const messageContainerRef = useRef(null);
   const topSentinelRef = useRef(null);
   const [newMessage, setNewMessage] = useState('');
+  const { user } = useAuth();
 
   const baseUrl = process.env.REACT_APP_API_BASE_URL;
   const wsUrl = process.env.REACT_APP_WEBSOCKET_URL;
@@ -22,7 +24,17 @@ const ChatView = ({ chatName }) => {
       socket.send(JSON.stringify({
         message: newMessage
       }));
-      setMessages((prev) => [...prev, newMessage]);
+
+      console.log(user);
+
+      const userMessage = {
+        id: `local-${new Date().now}-${Math.random()}`,
+        content: newMessage,
+        sender: user.username,
+        timestamp: new Date().toLocaleString(),
+      };
+
+      setMessages((prev) => [...prev, userMessage]);
       setNewMessage('');
     }
   };
@@ -121,7 +133,7 @@ const ChatView = ({ chatName }) => {
               </ReactMarkdown>
             </div>
             <div className={`text-xs text-gray-500 mt-1 ${msg.sender !== 'BodhiBot' ? 'text-right' : 'text-left'}`}>
-              {msg.sender !== 'BodhiBot' ? new Date().toLocaleString() + " | You" : new Date(msg.timestamp).toLocaleString() + " | BodhiBot"}
+              {new Date(msg.timestamp).toLocaleString() + ` | ${msg.sender}`}
             </div>
           </div>
         ))}

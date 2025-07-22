@@ -6,13 +6,14 @@ import MainPage from './Pages/MainPage';
 import './App.css';
 
 function AppContent() {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
+  // const [authenticated, setAuthenticated] = useState(isAuthenticated);
 
   return (
     <div className="app-container">
       {isAuthenticated ? (
-        <MainPage logout={logout} />
+        <MainPage />
       ) : (
         <>
           <LandingPage setShowModal={setShowAuthModal} />

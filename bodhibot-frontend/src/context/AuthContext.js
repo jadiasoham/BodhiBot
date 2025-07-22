@@ -18,7 +18,8 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem("refresh_token", refreshToken);
         const decodedUser = accessToken ? jwtDecode(accessToken) : null;
         setUser(decodedUser);
-        setIsAuthenticated(!!accessToken);
+        decodedUser ? setIsAuthenticated(true) : setIsAuthenticated(false);
+        setIsLoading(false);
     }, []);
 
     // Function to clear user and token upon a logout.
