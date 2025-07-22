@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
-import ReactMarkdown from 'react-markdown'; // Import ReactMarkdown
-// import remarkGfm from 'remark-gfm'; // Optional: for GitHub Flavored Markdown (tables, task lists)
-// import rehypeRaw from 'rehype-raw'; // Optional: for rendering raw HTML embedded in markdown
+import ReactMarkdown from 'react-markdown';
+// import remarkGfm from 'remark-gfm';
+// import rehypeRaw from 'rehype-raw';
 
 const ChatView = ({ chatName }) => {
   const [messages, setMessages] = useState([]);
@@ -22,6 +22,7 @@ const ChatView = ({ chatName }) => {
       socket.send(JSON.stringify({
         message: newMessage
       }));
+      setMessages((prev) => [...prev, newMessage]);
       setNewMessage('');
     }
   };
@@ -63,7 +64,7 @@ const ChatView = ({ chatName }) => {
         },
       });
 
-      const newMessages = res.data.results.reverse(); // Make it oldest → newest
+      const newMessages = res.data.results.reverse();
       setMessages((prev) => [...newMessages, ...prev]);
       setNextCursor(res.data.next?.split('cursor=')[1] || null);
     } catch (err) {
@@ -110,17 +111,17 @@ const ChatView = ({ chatName }) => {
         <div ref={topSentinelRef}></div>
         {messages.map((msg) => (
           <div key={msg.id} className="my-2 flex flex-col">
-            <div className={`max-w-[75%] px-4 py-2 rounded-lg ${msg.sender === 'user' ? 'bg-blue-500 text-white self-end ml-auto' : 'bg-gray-200 text-black self-start'}`}>
+            <div className={`max-w-[75%] px-4 py-2 rounded-lg ${msg.sender !== 'BodhiBot' ? 'bg-blue-500 text-white self-end ml-auto' : 'bg-gray-200 text-black self-start'}`}>
               {/* Render Markdown here */}
               <ReactMarkdown
-                // remarkPlugins={[remarkGfm]} // For GitHub Flavored Markdown (tables, task lists etc.)
-                // rehypePlugins={[rehypeRaw]} // Use rehypeRaw if you expect raw HTML within your markdown (use with caution regarding XSS)
+                // remarkPlugins={[remarkGfm]}
+                // rehypePlugins={[rehypeRaw]}
               >
                 {msg.content}
               </ReactMarkdown>
             </div>
-            <div className={`text-xs text-gray-500 mt-1 ${msg.sender === 'user' ? 'text-right' : 'text-left'}`}>
-              {new Date(msg.timestamp).toLocaleString()}
+            <div className={`text-xs text-gray-500 mt-1 ${msg.sender !== 'BodhiBot' ? 'text-right' : 'text-left'}`}>
+              {msg.sender !== 'BodhiBot' ? new Date().toLocaleString() + " | You" : new Date(msg.timestamp).toLocaleString() + " | BodhiBot"}
             </div>
           </div>
         ))}

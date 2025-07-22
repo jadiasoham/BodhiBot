@@ -81,3 +81,32 @@
   color: var(--light-color);           /* Light text on footer */
   border-top: 1px solid #eee;       /* You might want to adjust this border color */
 }
+
+/* Markdown Inside chat bubbles */
+.chat-message-bubble h1 {
+  font-size: 1.5em;
+  margin-bottom: 0.5em;
+  font-weight: bold;
+}
+
+.chat-message-bubble p {
+  margin-bottom: 0.5em;
+}
+
+.chat-message-bubble pre {
+  background-color: #e2e8f0; /* Tailwind gray-200 */
+  padding: 0.75rem;
+  border-radius: 0.375rem; /* Tailwind rounded-lg */
+  overflow-x: auto; /* For long code lines */
+}
+
+.chat-message-bubble code {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+  font-size: 0.9em;
+  color: #c026d3; /* Tailwind purple-600 example */
+}
+
+.chat-message-bubble ul {
+  list-style-type: disc;
+  margin-left: 1.5em;
+}
