@@ -1,14 +1,19 @@
 from ..models import Chat
 from ..serializers import MessageSerializer
 from django.shortcuts import get_object_or_404
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 import time
+
+User = get_user_model()
 
 
 def start_a_chat(username, chat_name):
     """Creates a chat object and returns or retrieves an existing chat."""
-    user = get_object_or_404(User, username= username)
-    
+    try:
+        user = get_object_or_404(User, username= username)
+    except Exception as e:
+        print(e)
+        return
     chat, created = Chat.objects.get_or_create(
         user= user,
         name= chat_name,

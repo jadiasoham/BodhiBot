@@ -6,6 +6,8 @@ from rest_framework import status
 from .paginators import ChatCursorPagination
 from .models import Chat, Message
 from .serializers import ChatSerializer, MessageSerializer
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 
 class UserChatView(APIView):
     permission_classes = [IsAuthenticated]
@@ -57,4 +59,19 @@ class MessageView(APIView):
 
         serializer = MessageSerializer(messages, many= True)
         return paginator.get_paginated_response(serializer.data)
+    
+@csrf_exempt # For simplicity during testing, remove in production if not needed
+def debug_headers_view(request):
+    """
+    A view to echo all request headers.
+    """
+    headers = {key: value for key, value in request.headers.items()}
+    return JsonResponse({
+        'method': request.method,
+        'path': request.path,
+        'headers': headers,
+        'get_params': request.GET,
+        'body': request.body.decode('utf-8', errors='ignore') # Decode body if present
+    })
+
         

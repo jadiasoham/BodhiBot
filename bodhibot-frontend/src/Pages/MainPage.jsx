@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import ChatList from '../components/ChatList';
+import ChatView from '../components/ChatView';
 import axios from 'axios';
 
 const baseUrl = process.env.REACT_APP_API_BASE_URL;
 
-const MainPage = () => {
+const MainPage = (logout) => {
   const [chatList, setChatList] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
 
@@ -27,20 +28,40 @@ const MainPage = () => {
   };
 
   return (
+    <>
+    {/* NavBar */}
+      <nav className="top-navbar flex items-center justify-between p-4 bg-white shadow-md">
+        <div className="app-title text-xl font-semibold flex items-center">
+          <img
+            src="img/CSELogo.png"
+            alt="Logo"
+            className="h-8 mr-2"
+          />
+          BodhiBot: Your Educational AI Assistant
+        </div>
+        <div className="auth-buttons">
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+            onClick={logout}
+          >
+            Logout
+          </button>
+        </div>
+      </nav>
+
     <div className="flex h-screen">
       <ChatList onChatSelect={setSelectedChat} onChatAdd={addNewChat} />
       <div className="flex-1 p-4">
         {selectedChat ? (
           <div>
-            {/* <ChatScreen chat={selectedChat} /> */}
-            <p className="text-lg font-medium">Chat messages for: {selectedChat.name} will appear here once ready!</p>
-            {/* This is a temporary placeholder, and will be replaced with the actual chat screen once ready. */}
+            <ChatView chatName={selectedChat.name} />
           </div>
         ) : (
           <p className="text-gray-500">Select a chat to begin</p>
         )}
       </div>
     </div>
+    </>
   );
 };
 
