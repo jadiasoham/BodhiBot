@@ -2,7 +2,8 @@ from django.db import models
 from users.models import User
 
 class Chat(models.Model):
-    user = models.ForeignKey(User, on_delete= models.SET_NULL, null= True)
+    # user = models.ForeignKey(User, on_delete= models.SET_NULL, null= True)
+    user = models.CharField(max_length= 50, verbose_name= "user name", default= "Anonymous User", help_text= "Identifier for the user, can be a username or any unique identifier, is extracted from the decoded jwt token sent from the frontend.")
     name = models.CharField(max_length= 255)
     created_at = models.DateTimeField(auto_now_add= True)
     last_message = models.DateTimeField(auto_now= True)
