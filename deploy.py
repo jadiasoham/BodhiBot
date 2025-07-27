@@ -43,7 +43,7 @@ def get_defaults(app_name):
         "backend_port": "8000",
         "celery_pool": "solo",
         "container_prefix": app_name,
-        "auth_mode": "internal",
+        # "auth_mode": "internal",
     }
 
 def get_configs(defaults, *, interactive=True, args=None):
