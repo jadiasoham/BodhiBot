@@ -40,9 +40,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
 
             # Check if authenticated, if not immedeatly close connection:
-            if not self.user.is_authenticated:
-                await self.close()
-                return
+            # if not self.user.is_authenticated:
+            #     await self.close()
+            #     return
 
             # Create a Chat object
             print("start a chat")
