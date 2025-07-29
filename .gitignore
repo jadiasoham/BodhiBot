@@ -12,6 +12,7 @@ venv/
 *env*/
 .env/
 .python-version
+py311
 
 # ⚙️ Conda environment files
 *.conda

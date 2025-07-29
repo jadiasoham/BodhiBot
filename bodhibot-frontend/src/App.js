@@ -1,35 +1,52 @@
 import React, { useState } from "react";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from './context/AuthContext';
 import AuthModal from './components/AuthModal';
-import LandingPage from './Pages/LandingPage';
+import LandingPage from "./Pages/LandingPage";
 import MainPage from './Pages/MainPage';
 import './App.css';
 
-function AppContent() {
-  const { isAuthenticated } = useAuth();
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  // const [authenticated, setAuthenticated] = useState(isAuthenticated);
 
-  return (
-    <div className="app-container">
-      {isAuthenticated ? (
-        <MainPage />
-      ) : (
-        <>
-          <LandingPage setShowModal={setShowAuthModal} />
-          {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
-        </>
-      )}
-    </div>
-  );
-}
+function ProtectedRoute({ element }) {
+	const { isAuthenticated } = useAuth();
+	return isAuthenticated ? element : <Navigate to="/" />;
+};
+
+function AppRoutes() {
+	const [showAuthModal, setShowAuthModal] = useState(false);
+
+	return (
+		<>
+			<Routes>
+				<Route
+					path= "/"
+					element = {
+						<>
+							<LandingPage setShowAuthModal={ setShowAuthModal } />
+							{ showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />} 
+						</>
+					}
+				/>
+				
+				<Route
+					path="/main"
+					element= {
+						<ProtectedRoute element={<MainPage />} />
+					}
+				/>
+			</Routes>
+		</>
+	);
+};
 
 function App() {
-  return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
-  );
-}
+	return (
+		<AuthProvider>
+			<Router>
+				<AppRoutes />
+			</Router>
+		</AuthProvider>
+	);
+};
 
 export default App;
