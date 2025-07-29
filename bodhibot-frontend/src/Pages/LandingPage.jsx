@@ -9,7 +9,7 @@ const LandingPage = () => {
 
   const onLogin = () => {
     setShowModal(false);
-    navigate('./main');
+    navigate('/main');
   };
 
   return (
