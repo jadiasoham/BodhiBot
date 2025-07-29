@@ -1,4 +1,4 @@
-from ..models import Chat
+from ..models import Chat, Message
 from ..serializers import MessageSerializer
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
@@ -35,4 +35,20 @@ def create_message(chat, sender, content):
     serializer.save()
     
     return serializer.data
+
+def get_n_messages_in_chat(chat, n, *, orderby= "-timestamp"):
+    """Returns serialized data of n messages, ordered by the requested criterion"""
+    messages = Message.objects.filter(chat= chat).order_by(orderby)[:n]
+    if orderby.startswith("-"):
+        messages = list(reversed(messages))
+    
+    serializer = MessageSerializer(messages, many= True)
+    data = serializer.data
+    for msg_data in data:
+        for key in list(msg_data):
+            if key.lower() not in ["sender", "content"]:
+                msg_data.pop(key, None)
+    
+    return data
+
 
