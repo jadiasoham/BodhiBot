@@ -36,7 +36,7 @@ const MainPage = () => {
       <nav className="top-navbar flex items-center justify-between p-4 bg-white shadow-md">
         <div className="app-title text-xl font-semibold flex items-center">
           <img
-            src="img/CSELogo.png"
+            src="BodhibotLogo.png"
             alt="Logo"
             className="h-8 mr-2"
           />
