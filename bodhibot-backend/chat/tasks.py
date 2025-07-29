@@ -32,6 +32,9 @@ def generate_response_task(user_prompt, context= None, summary= None):
             context= context,
             summary= summary
         )
+        print("+++++++++++++++++++++++++++")
+        print(formatted_prompt)
+        print("+++++++++++++++++++++++++++")
 
         start_time = time.time()
         response = generate_response(
@@ -41,6 +44,10 @@ def generate_response_task(user_prompt, context= None, summary= None):
             device= device,
         )
         end_time = time.time()
+        res_list = response.strip().lower().split()
+        if len(res_list) < 2 and len(response.strip()) < 3 and 'no' not in res_list:
+            print("Actual response: ", response, "\nModifying...")
+            response = "I don't understand. Can you clarify?"
         print(f"Response generated in {end_time - start_time:.2f} seconds")
     except Exception as e:
         print(f"Error in generate_response_task: {e}")
