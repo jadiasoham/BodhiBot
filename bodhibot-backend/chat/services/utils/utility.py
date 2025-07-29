@@ -1,13 +1,36 @@
+import json
+
+def deserialize_messages_for_context(data):
+    """
+    Deserializes the message's serializer.data for injecting into chat prompt's context
+    the message serializer (i.e., each element of data) contains fields: id, sender, content, timestamp
+    """
+    chat_history = list()
+    for message in data:
+        this_item = {}
+        this_item["role"] = "user" if message["sender"].lower() != "bodhibot" else "assistant"
+        this_item["content"] = message["content"]
+        chat_history.append(this_item)
+
+    return chat_history
+
+    
+
 def format_prompt_for_qwen(user_prompt, system_prompt=None, context=None, summary=None):
     """
     Formats the prompt string for Qwen-style models using system/user role markers.
+    (context is expected as a json.dumps compatible)
+    (summary isn't expected and is adviced to be ignored so as not to exceed the token limit)
     """
     messages = []
     if system_prompt:
         messages.append({"role": "system", "content": system_prompt})
     
     if context:
-        messages.append({"role": "user", "content": "[Context]\n" + context})
+        serializable_context = deserialize_messages_for_context(context)
+        for msg in serializable_context:
+            messages.append(msg)
+        # messages.append({"role": "user", "content": "[Context]\n" + context_str})
 
     if summary:
         messages.append({"role": "user", "content": "[Summary]\n" + summary})
