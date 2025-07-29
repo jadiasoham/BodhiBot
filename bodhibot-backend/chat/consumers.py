@@ -3,10 +3,13 @@ from datetime import datetime
 import uuid
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .tasks import generate_response_task
-from .services.chat_service import create_message, start_a_chat
+from .services.chat_service import create_message, start_a_chat, get_n_messages_in_chat
 from asgiref.sync import sync_to_async
 from rest_framework_simplejwt.tokens import AccessToken
 from django.contrib.auth import get_user_model
+from .models import Chat, Message
+from collections import deque
+from django.conf import settings
 
 User = get_user_model()
 
@@ -32,6 +35,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
             self.room_name = self.scope['url_route']['kwargs']['room_name']
             self.room_group_name = f"chat_{self.room_name}"
+            self.history = deque(maxlen= settings.CHAT_HISTORY_LEN)
+            # Initially each element of self.history will contain all the fields returned by the message's serializer.
+            # Minimally it should just contain a sender and content field.
 
             # Join the room/ group
             await self.channel_layer.group_add(
@@ -40,15 +46,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
 
             # Check if authenticated, if not immedeatly close connection:
-            # if not self.user.is_authenticated:
-            #     await self.close()
-            #     return
+            if not self.user.is_authenticated:
+                await self.close()
+                return
 
             # Create a Chat object
             print("start a chat")
             self.chat = await sync_to_async(start_a_chat)(username=self.user.username, chat_name=self.room_name)
             print(str(self.chat))
-
+            message_history = await sync_to_async(get_n_messages_in_chat)(self.chat, settings.CHAT_HISTORY_LEN)
+            self.history.extend(message_history)
 
             await self.accept()
             await self.send(text_data=json.dumps({"message": "Connected to BodhiBot"}))
@@ -66,15 +73,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         data = json.loads(text_data)
         message = data.get("message", "")
-        context = data.get("context", "")
+        # context = data.get("context", "")
+        context = self.history
         summary = data.get("summary", "")
 
         # Create a message object:
         print("got a message for bot!")
         await sync_to_async(create_message)(chat=self.chat, sender=self.user.username, content=message)
+        # self.history.append({"sender": self.user.username, "content": message})
+        # print(self.history)
+
 
         # Celery task to generate the response
-        task = generate_response_task.delay(message, context, summary)
+        task = generate_response_task.delay(message, list(context), summary)
+
+        self.history.append({"sender": self.user.username, "content": message})
 
         response = task.get(timeout= 90) # Wait atleast 90 seconds before breaking the pipe.
 
@@ -96,6 +109,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Record the response as a message object as well:
         print("bot has responded - sending to user...")
         await sync_to_async(create_message)(chat= self.chat, sender= "BodhiBot", content= response)
+        self.history.append({"sender": "bodhibot", "content": response})
 
     async def chat_message(self, event):
         await self.send(text_data= json.dumps({
