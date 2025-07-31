@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from 'axios';
+import { useAuth } from "../context/AuthContext";
 
 const baseUrl = `${process.env.REACT_APP_API_BASE_URL}auth/`;
 
@@ -7,6 +8,7 @@ const LoginForm = ({ onSuccess, onLoginSuccess }) => {
     const [formData, setFormData] = useState({ username: "", password: "" });
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false); // to indicate loading state
+    const { setAuthTokens } = useAuth();
 
     const handleSubmit = async e => {
         e.preventDefault();
@@ -18,12 +20,11 @@ const LoginForm = ({ onSuccess, onLoginSuccess }) => {
             console.log("Logged in: ", response.data);
             
             // store the tokens returned by Django's TokenObtainPair View:
-            localStorage.setItem("access_token", response.data.access);
-            localStorage.setItem("refresh_token", response.data.refresh);
+            const { access, refresh } = response.data;
+            console.log(access);
+            console.log(refresh);
 
-            if (onLoginSuccess) {
-                onLoginSuccess(response.data.access);
-            }
+            setAuthTokens(access, refresh)
 
             onSuccess();
         } catch (err) {
