@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import AuthModal from '../components/AuthModal';
 import Footer from '../components/Footer';
 import { useNavigate } from 'react-router-dom';
@@ -6,11 +7,14 @@ import { useNavigate } from 'react-router-dom';
 const LandingPage = () => {
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
-  const onLogin = () => {
-    setShowModal(false);
-    navigate('/main');
-  };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/main');
+    }
+  }, [isAuthenticated, navigate]);
 
   return (
     <>
@@ -73,7 +77,7 @@ const LandingPage = () => {
         <Footer />
 
         {/* Auth Modal */}
-        {showModal && <AuthModal onLoginSuccess={onLogin} onClose={() => setShowModal(false)} />}
+        {showModal && <AuthModal onClose={() => setShowModal(false)} />}
       </div>
     </>
   );
