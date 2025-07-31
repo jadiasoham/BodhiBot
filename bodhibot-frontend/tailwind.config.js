@@ -14,6 +14,7 @@ module.exports = {
       fontFamily: {
         heading: ['Poppins', 'sans-serif'],
         body: ['Inter', 'sans-serif'],
+        comic: ['"comic sans ms"', 'cursive', 'sans-serif'],
       },
     },
   },
