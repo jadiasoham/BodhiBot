@@ -8,11 +8,14 @@ from .models import Chat, Message
 from .serializers import ChatSerializer, MessageSerializer
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from urllib.parse import unquote
 
 class UserChatView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        print("Inside get..")
+        print(request.user, " type: ", type(request.user))
         try:
             chats = Chat.objects.filter(user= request.user).order_by('-last_message')
         except Exception as e:
@@ -27,7 +30,7 @@ class UserChatView(APIView):
 
         chat_data = {
             "user": request.user.id,
-            "name": data.get("name", "Unnamed")
+            "name": unquote(data.get("name", "Unnamed"))
         }
 
         serializer = ChatSerializer(data= chat_data)

@@ -1,4 +1,5 @@
 import json
+from django.conf import settings
 
 def deserialize_messages_for_context(data):
     """
@@ -39,7 +40,7 @@ def format_prompt_for_qwen(user_prompt, system_prompt=None, context=None, summar
 
     return messages
 
-def generate_response(model, tokenizer, formatted_prompt, device, max_length= 512, temperature= 0.7):
+def generate_response(model, tokenizer, formatted_prompt, device, max_length= 512):
     """Generates a response from model using the provided formatted prompt."""
 
     text = tokenizer.apply_chat_template(
@@ -54,9 +55,9 @@ def generate_response(model, tokenizer, formatted_prompt, device, max_length= 51
         **inputs,
         pad_token_id= tokenizer.eos_token_id,
         do_sample= True,
-        top_p= 0.6,
-        temperature= temperature,
-        max_new_tokens= 2048,
+        top_p= 0.7,
+        temperature= settings.TEMPERATURE,
+        max_new_tokens= settings.MAX_NEW_TOKENS,
     )
 
     # Extract only the new tokens as the response

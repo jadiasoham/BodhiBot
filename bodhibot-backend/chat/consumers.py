@@ -10,6 +10,7 @@ from django.contrib.auth import get_user_model
 from .models import Chat, Message
 from collections import deque
 from django.conf import settings
+from urllib.parse import quote
 
 User = get_user_model()
 
@@ -34,7 +35,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             print("from connect ", self.user.username, " | ", self.user)
 
             self.room_name = self.scope['url_route']['kwargs']['room_name']
-            self.room_group_name = f"chat_{self.room_name}"
+            print("This is the chat_title: ", quote(self.room_name))
+            self.room_group_name = f"chat_{quote(self.room_name)}"
             self.history = deque(maxlen= settings.CHAT_HISTORY_LEN)
             # Initially each element of self.history will contain all the fields returned by the message's serializer.
             # Minimally it should just contain a sender and content field.
@@ -52,7 +54,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
             # Create a Chat object
             print("start a chat")
-            self.chat = await sync_to_async(start_a_chat)(username=self.user.username, chat_name=self.room_name)
+            self.chat = await sync_to_async(start_a_chat)(username=self.user.username, chat_name=quote(self.room_name))
             print(str(self.chat))
             message_history = await sync_to_async(get_n_messages_in_chat)(self.chat, settings.CHAT_HISTORY_LEN)
             self.history.extend(message_history)

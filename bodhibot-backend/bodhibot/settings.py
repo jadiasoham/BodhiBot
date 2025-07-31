@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+import ldap
+from django_auth_ldap.config import LDAPSearch, PosixGroupType
 from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -152,6 +154,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -179,12 +185,86 @@ CHANNEL_LAYERS = {
     },
 }
 
-# Model Specific
+# ML Model Specific
+
+# Where to find the model, and its adapter?
 MODEL_PATH = os.getenv("MODEL_PATH", "/home/soham/Downloads/Qwen/Qwen2.5-Coder-7b-Instruct")
 ADAPTER_PATH = os.getenv("ADAPTER_PATH", "/home/soham/Downloads/Qwen/Qwen2.5-Coder-7b-Instruct-Adapter")
+
+# What device to run it on
 DEVICE = os.getenv("DEVICE", "cuda:0")
-CHAT_HISTORY_LEN = 5
+
+# How many new tokens to limit to during generation?
+MAX_NEW_TOKENS = 256
+
+# Creativity of LLM (0-1)
+TEMPERATURE = 0.7
+
+# How many previous messages to provide as a context for a chat continuation
+CHAT_HISTORY_LEN = 6
+
+# The System Prompt... (This basically sets up the role.)
 SYSTEM_PROMPT = """Your name is BodhiBot. You are a helpful Educational AI assistant.
 You are designed to assist students with their academic queries, provide explanations, and give hints if they are stuck with their assignments.
-You must keep your answers concise and to the point. Only provide elaborate explanations when explicitly asked.
+You must keep your answers brief and to the point, between 80 to 100 words. Only provide elaborate explanations when explicitly asked.
 You are not allowed to provide any information that is not related to academics. If such questions are asked, you must respond with: 'I am not supposed to answer that.'"""
+
+
+# For LDAP AUTH
+
+LDAP_AUTH_CREATE_USERS = True
+# Baseline configuration.
+AUTH_LDAP_SERVER_URI = os.getenv('AUTH_LDAP_SERVER_URI', "ldap://1.ldap.cse.iitb.ac.in:389")
+AUTH_LDAP_START_TLS = True
+
+# Anonymous bind is allowed 
+AUTH_LDAP_BIND_DN = os.getenv('AUTH_LDAP_BIND_DN', '')
+AUTH_LDAP_BIND_PASSWORD = os.getenv('AUTH_LDAP_BIND_PASSWORD', '')
+
+# Search for users under the folder /People in the cse.iitb.ac.in domain.
+AUTH_LDAP_USER_SEARCH = LDAPSearch(
+    'ou=People,dc=cse,dc=iitb,dc=ac,dc=in',
+    ldap.SCOPE_SUBTREE,
+    '(uid=%(user)s)'
+)
+
+AUTH_LDAP_GROUP_SEARCH = LDAPSearch(
+    'ou=Groups,dc=cse,dc=iitb,dc=ac,dc=in',
+    ldap.SCOPE_SUBTREE,
+    '(objectClass=*)',
+)
+
+# The LDAP attributes are mapped to Django user model fields.
+AUTH_LDAP_USER_ATTR_MAP = {
+    'username': 'uid',
+    'first_name': 'cn',
+    'last_name': 'sn',
+    'email': 'mail',
+}
+
+# For group-based access control .
+# Cse IITB uses PosixGroupType for group membership.
+AUTH_LDAP_GROUP_TYPE = PosixGroupType(name_attr='cn') 
+
+AUTH_LDAP_MIRROR_GROUPS_EXCEPT = ['moderator','webfac','external']
+
+# To Check LDAP to see if the user is a member of a group.
+AUTH_LDAP_FIND_GROUP_PERMS = True
+
+# Cache the group memberships
+AUTH_LDAP_CACHE_GROUPS = True
+
+
+# Checks User Membership in LDAP groups, assigns given mentioned permissions to the user.
+AUTH_LDAP_USER_FLAGS_BY_GROUP = {
+    "is_staff" : ["cn=staff,ou=Groups,dc=cse,dc=iitb,dc=ac,dc=in","cn=webteam,ou=Groups,dc=cse,dc=iitb,dc=ac,dc=in"],
+    "is_superuser" : "cn=webteam,ou=Groups,dc=cse,dc=iitb,dc=ac,dc=in"
+}
+
+# Every time a user logs in, the LDAP server is checked for the latest information.
+AUTH_LDAP_ALWAYS_UPDATE_USER = True
+
+AUTHENTICATION_BACKENDS = [
+    'django_auth_ldap.backend.LDAPBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]

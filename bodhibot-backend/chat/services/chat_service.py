@@ -3,6 +3,7 @@ from ..serializers import MessageSerializer
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 import time
+from urllib.parse import unquote
 
 User = get_user_model()
 
@@ -16,7 +17,7 @@ def start_a_chat(username, chat_name):
         return
     chat, created = Chat.objects.get_or_create(
         user= user,
-        name= chat_name,
+        name= unquote(chat_name),
     )
 
     if created:
