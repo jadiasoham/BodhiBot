@@ -1,9 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
-import ReactMarkdown from 'react-markdown';
 import { useAuth } from '../context/AuthContext';
-// import remarkGfm from 'remark-gfm';
-// import rehypeRaw from 'rehype-raw';
+import MessageRender from './MessageRender';
 
 const ChatView = ({ chatName }) => {
   const [messages, setMessages] = useState([]);
@@ -125,12 +123,7 @@ const ChatView = ({ chatName }) => {
           <div key={msg.id} className="my-2 flex flex-col">
             <div className={`max-w-[75%] px-4 py-2 rounded-lg ${msg.sender !== 'BodhiBot' ? 'bg-blue-500 text-white self-end ml-auto' : 'bg-gray-200 text-black self-start'}`}>
               {/* Render Markdown here */}
-              <ReactMarkdown
-                // remarkPlugins={[remarkGfm]}
-                // rehypePlugins={[rehypeRaw]}
-              >
-                {msg.content}
-              </ReactMarkdown>
+              <MessageRender chatMessage={msg.content} />
             </div>
             <div className={`text-xs text-gray-500 mt-1 ${msg.sender !== 'BodhiBot' ? 'text-right' : 'text-left'}`}>
               {new Date(msg.timestamp).toLocaleString() + ` | ${msg.sender}`}
