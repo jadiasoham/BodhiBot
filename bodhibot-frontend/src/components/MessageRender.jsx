@@ -4,11 +4,11 @@ import rehypeRaw from 'rehype-raw';
 import ReactMarkdown from 'react-markdown';
 
 
-const MessageRender = (chatMessage) => {
+const MessageRender = ({chatMessage}) => {
   return (
     <ReactMarkdown
-      remarkPlugins={remarkGfm}
-      rehypePlugins={rehypeRaw}
+      remarkPlugins={[remarkGfm]}
+      rehypePlugins={[rehypeRaw]}
     >
       {chatMessage}
     </ReactMarkdown>
