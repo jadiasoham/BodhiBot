@@ -32,14 +32,10 @@ const MainPage = () => {
 
   return (
     <>
-    {/* NavBar */}
+      {/* NavBar */}
       <nav className="top-navbar flex items-center justify-between p-4 bg-white shadow-md">
         <div className="app-title text-xl font-semibold flex items-center">
-          <img
-            src="BodhibotLogo.png"
-            alt="Logo"
-            className="h-8 mr-2"
-          />
+          <img src="BodhibotLogo.png" alt="Logo" className="h-8 mr-2" />
           BodhiBot: Your Educational AI Assistant
         </div>
         <div className="auth-buttons">
@@ -52,18 +48,27 @@ const MainPage = () => {
         </div>
       </nav>
 
-    <div className="flex h-screen">
-      <ChatList onChatSelect={setSelectedChat} onChatAdd={addNewChat} />
-      <div className="flex-1 p-4">
-        {selectedChat ? (
-          <div>
+      {/* Chat Layout */}
+      <div className="flex h-[calc(100vh-64px)] overflow-hidden"> {/* Adjusted for navbar height */}
+        {/* Chat List - 30% */}
+        <div className="w-[30%] max-w-sm border-r border-gray-300 overflow-y-auto bg-gray-50">
+          <ChatList
+            onChatSelect={setSelectedChat}
+            onChatAdd={addNewChat}
+          />
+        </div>
+
+        {/* Chat View - 70% */}
+        <div className="w-[70%] flex-1 p-4 overflow-y-auto">
+          {selectedChat ? (
             <ChatView chatName={selectedChat.name} />
-          </div>
-        ) : (
-          <p className="text-gray-500">Select a chat to begin</p>
-        )}
+          ) : (
+            <div className="text-center text-gray-500 mt-10 text-lg">
+              Select a chat to begin
+            </div>
+          )}
+        </div>
       </div>
-    </div>
     </>
   );
 };
