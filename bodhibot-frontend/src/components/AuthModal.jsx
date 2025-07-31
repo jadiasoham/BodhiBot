@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";
 
-const AuthModal = ({ onLoginSuccess, onClose }) => {
+const AuthModal = ({ onClose }) => {
     const [activeTab, setActiveTab] = useState("login");
 
     return (
@@ -25,7 +25,7 @@ const AuthModal = ({ onLoginSuccess, onClose }) => {
                         Sign Up
                     </button>
                 </div>
-                {activeTab === 'login' ? <LoginForm onSuccess={ onLoginSuccess } /> : <SignupForm onSuccess={ onClose } />}
+                {activeTab === 'login' ? <LoginForm onSuccess={ onClose } /> : <SignupForm onSuccess={ onClose } />}
             </div>
         </div>
     );
