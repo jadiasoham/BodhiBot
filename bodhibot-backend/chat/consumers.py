@@ -28,14 +28,12 @@ async def authenticate_token(token):
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         """Enter a group"""
-        print("starting ws connection")
         try:
             token = self.scope["query_string"].decode().split("=")[-1]
             self.user = await authenticate_token(token)
-            print("from connect ", self.user.username, " | ", self.user)
 
             self.room_name = self.scope['url_route']['kwargs']['room_name']
-            print("This is the chat_title: ", quote(self.room_name))
+            print("This is the chat_title: ", quote(self.room_name), " which is actually: ", self.room_name)
             self.room_group_name = f"chat_{quote(self.room_name)}"
             self.history = deque(maxlen= settings.CHAT_HISTORY_LEN)
             # Initially each element of self.history will contain all the fields returned by the message's serializer.
