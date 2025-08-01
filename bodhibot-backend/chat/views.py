@@ -14,8 +14,6 @@ class UserChatView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        print("Inside get..")
-        print(request.user, " type: ", type(request.user))
         try:
             chats = Chat.objects.filter(user= request.user).order_by('-last_message')
         except Exception as e:
@@ -63,7 +61,7 @@ class MessageView(APIView):
         serializer = MessageSerializer(messages, many= True)
         return paginator.get_paginated_response(serializer.data)
     
-@csrf_exempt # For simplicity during testing, remove in production if not needed
+@csrf_exempt # To test ws upgrade
 def debug_headers_view(request):
     """
     A view to echo all request headers.
