@@ -64,7 +64,8 @@ htmlcov/
 *.iml
 
 # Jupyter Notebooks
-.ipynb_checkpoints/
+*.ipynb_checkpoints/
+*.ipynb
 
 # Backup files
 *.bak
