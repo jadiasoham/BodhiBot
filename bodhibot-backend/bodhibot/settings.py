@@ -219,9 +219,9 @@ You are not allowed to provide any information that is not related to academics.
 LDAP_AUTH_CREATE_USERS = True
 # Baseline configuration.
 AUTH_LDAP_SERVER_URI = os.getenv('AUTH_LDAP_SERVER_URI', "ldap://1.ldap.cse.iitb.ac.in:389")
-AUTH_LDAP_START_TLS = True
+# AUTH_LDAP_START_TLS = True
 
-# Anonymous bind is allowed 
+ 
 AUTH_LDAP_BIND_DN = os.getenv('AUTH_LDAP_BIND_DN', '')
 AUTH_LDAP_BIND_PASSWORD = os.getenv('AUTH_LDAP_BIND_PASSWORD', '')
 
