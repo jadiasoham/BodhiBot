@@ -34,7 +34,7 @@ ALLOWED_HOSTS = [
 ]
 
 
-# Application definition
+#################### APPLICATION DEFINITION ####################
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -168,6 +168,12 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
+#################### APPLICATION DEFINITION ENDS ####################
+
+
+#################### CELERY CONFIGURATION ####################
+
 # Celery Configuration
 CELERY_BROKER_URL = 'redis://localhost:6379/0'   # redis broker
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/1'  # for storing results
@@ -189,7 +195,10 @@ CHANNEL_LAYERS = {
     },
 }
 
-# ML Model Specific
+#################### CELERY CONFIGURATION ENDS ####################
+
+
+#################### LLM INFERENCE CONFIGURATION ####################
 
 # Where to find the model, and its adapter?
 MODEL_PATH = os.getenv("MODEL_PATH", "/home/soham/Downloads/Qwen/Qwen2.5-Coder-7b-Instruct")
@@ -213,8 +222,10 @@ You are designed to assist students with their academic queries, provide explana
 You must keep your answers brief and to the point, between 80 to 100 words. Only provide elaborate explanations when explicitly asked.
 You are not allowed to provide any information that is not related to academics. If such questions are asked, you must respond with: 'I am not supposed to answer that.'"""
 
+#################### LLM INFERENCE CONFIGURATION ENDS ####################
 
-# For LDAP AUTH
+
+##################### LDAP AUTH CONFIGURATION ####################
 
 LDAP_AUTH_CREATE_USERS = True
 # Baseline configuration.
@@ -272,3 +283,5 @@ AUTHENTICATION_BACKENDS = [
     'django_auth_ldap.backend.LDAPBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
+
+#################### LDAP AUTH CONFIGURATION ENDS ####################
