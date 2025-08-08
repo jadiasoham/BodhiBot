@@ -25,3 +25,6 @@ Miniconda*.sh
 *.tar.gz
 *.zip
 *.whl
+
+# Other files:
+*.pdf
