@@ -18,7 +18,7 @@ const ChatView = ({ chatName }) => {
 
 	const sendMessage = () => {
 		if (socket && socket.readyState === WebSocket.OPEN && newMessage.trim()) {
-			// Assuming your backend expects plain text and then converts it to Markdown if needed
+			console.log("Sending! 1")
 			socket.send(JSON.stringify({
 				message: newMessage
 			}));
@@ -73,8 +73,8 @@ const ChatView = ({ chatName }) => {
 					Authorization: `Bearer ${localStorage.getItem('access_token')}`,
 				},
 			});
-
-			const newMessages = res.data.results.reverse();
+			console.log(res?.data)
+			const newMessages = res?.data?.data.reverse();
 			setMessages((prev) => [...newMessages, ...prev]);
 			setNextCursor(res.data.next?.split('cursor=')[1] || null);
 		} catch (err) {

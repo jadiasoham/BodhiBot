@@ -1,28 +1,17 @@
 import React, { useState } from 'react';
 import ChatList from './components/ChatList';
 import ChatView from './components/ChatView';
-import axios from 'axios';
-import { useAuth } from '../../context/AuthContext';
+import axiosService from '../../components/axiosInterceptor';
 
 const baseUrl = process.env.REACT_APP_API_BASE_URL;
 
 const ChatsPage = () => {
-	const { logout } = useAuth();
-	const [chatList, setChatList] = useState([]);
 	const [selectedChat, setSelectedChat] = useState(null);
 
 	const addNewChat = async () => {
 		try {
-			const response = await axios.post(`${baseUrl}chats/my-chats/`, {
-				name: "ThisNewChat"
-			}, {
-				headers: {
-					'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-				}
-			});
-
-			const newChat = response.data;
-			setChatList((prev) => [...prev, newChat]);
+			const response = await axiosService.post(`${baseUrl}chats/my-chats/`, {name: "NewChat"});
+			const newChat = response?.data?.data;
 			setSelectedChat(newChat);
 		} catch (err) {
 			console.error("Error creating new chat: ", err);
@@ -37,7 +26,6 @@ const ChatsPage = () => {
 				{/* Chat List - 30% */}
 				<div className="w-[30%] max-w-sm border-r border-gray-300 overflow-y-auto bg-gray-50">
 					<ChatList
-						chats={chatList}
 						onChatSelect={setSelectedChat}
 						onChatAdd={addNewChat}
 					/>

@@ -10,7 +10,7 @@ const ChatList = ({ onChatSelect, onChatAdd }) => {
 
   const getChats = async() => {
     try {
-      const response = await axiosService.get(`${baseUrl}my-chats/`);
+      const response = await axiosService.get(`${baseUrl}chats/my-chats/`);
       if (response?.data) setChats(response.data.data);
     } catch (err) {
       console.error(`Unable to retrieve chats: ${err}`);
@@ -31,7 +31,7 @@ const ChatList = ({ onChatSelect, onChatAdd }) => {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold">Your Chats</h2>
         <button className='btn btn-primary' onClick={onChatAdd}>
-          <FaPlusCircle />
+          <FaPlusCircle size={32} />
         </button>
       </div>
 
