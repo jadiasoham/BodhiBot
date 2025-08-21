@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import AuthModal from '../components/AuthModal';
-import Footer from '../components/Footer';
+import { useAuth } from '../../context/AuthContext';
+import AuthModal from '../../components/AuthModal';
+import Footer from '../../components/Footer';
 import { useNavigate } from 'react-router-dom';
 
 const LandingPage = () => {

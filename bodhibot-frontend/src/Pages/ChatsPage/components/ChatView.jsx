@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../../context/AuthContext';
 import MessageRender from './MessageRender';
 
 const ChatView = ({ chatName }) => {
@@ -85,7 +85,7 @@ const ChatView = ({ chatName }) => {
   };
 
   const connectWebSocket = () => {
-    const ws = new WebSocket(`${wsUrl}${chatName.trim().replace(/\s+/g, "")}/?token=${localStorage.getItem('access_token')}`);
+    const ws = new WebSocket(`${wsUrl}${chatName?.trim()?.replace(/\s+/g, "") || "someSafeGenericName"}/?token=${localStorage.getItem('access_token')}`);
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);

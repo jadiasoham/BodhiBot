@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
-import ChatList from '../components/ChatList';
-import ChatView from '../components/ChatView';
+import ChatList from './components/ChatList';
+import ChatView from './components/ChatView';
 import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
 const baseUrl = process.env.REACT_APP_API_BASE_URL;
 
-const MainPage = () => {
+const ChatsPage = () => {
   const { logout } = useAuth();
   const [chatList, setChatList] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
 
-  const addNewChat = async (chatName) => {
+  const addNewChat = async () => {
     try {
       const response = await axios.post(`${baseUrl}chats/my-chats/`, {
-        name: chatName
+        name: "ThisNewChat"
       }, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`
@@ -53,6 +53,7 @@ const MainPage = () => {
         {/* Chat List - 30% */}
         <div className="w-[30%] max-w-sm border-r border-gray-300 overflow-y-auto bg-gray-50">
           <ChatList
+            chats={chatList}
             onChatSelect={setSelectedChat}
             onChatAdd={addNewChat}
           />
@@ -61,7 +62,7 @@ const MainPage = () => {
         {/* Chat View - 70% */}
         <div className="w-[70%] flex-1 p-4 overflow-y-auto">
           {selectedChat ? (
-            <ChatView chatName={selectedChat.name} />
+            <ChatView chatName={selectedChat.room_name || selectedChat.name} />
           ) : (
             <div className="text-center text-gray-500 mt-10 text-lg">
               Select a chat to begin
@@ -73,4 +74,4 @@ const MainPage = () => {
   );
 };
 
-export default MainPage;
+export default ChatsPage;
