@@ -2,6 +2,7 @@ from django.shortcuts import render
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
 from rest_framework import status
 from .paginators import ChatCursorPagination
 from .models import Chat, Message
@@ -15,26 +16,51 @@ class UserChatView(APIView):
 
     def get(self, request):
         try:
-            chats = Chat.objects.filter(user= request.user).order_by('-last_message')
+            chats = Chat.objects.filter(user=request.user).order_by('-last_message')
+            serializer = ChatSerializer(chats, many=True)
+            response = {
+                "status": "ok",
+                "data": serializer.data
+            }
+            if not serializer.data:
+                response["message"] = "No chats to load"
+            return Response(response, status=status.HTTP_200_OK)
+
         except Exception as e:
-            return Response({"error": e}, status= status.HTTP_500_INTERNAL_SERVER_ERROR)
-        if not chats.exists():
-            return Response({"message": "no chats to load"}, status= status.HTTP_404_NOT_FOUND)
-        serializer = ChatSerializer(chats, many= True)
-        return Response(serializer.data, status= status.HTTP_202_ACCEPTED)
+            return Response({
+                "status": "error",
+                "message": "Something went wrong. Please try again later."
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     def post(self, request):
         data = request.data
-
         chat_data = {
             "user": request.user.id,
-            "name": unquote(data.get("name", "Unnamed"))
+            "name": data.get("name", "Unnamed")
         }
+        try:
+            serializer = ChatSerializer(data= chat_data)
+            serializer.is_valid(raise_exception= True)
+            serializer.save()
 
-        serializer = ChatSerializer(data= chat_data)
-        serializer.is_valid(raise_exception= True)
-        serializer.save()
-        return Response(serializer.data, status= status.HTTP_201_CREATED)   
+            response_data = {
+                "status": "ok",
+                "data": serializer.data
+            }
+            return Response(response_data, status= status.HTTP_201_CREATED)
+        
+        except ValidationError as e:
+            # If the serializer raises error, then
+            return Response(
+                {"status": "error", "message": f"Error validating your data, try again later or report this incident."},
+                status= status.HTTP_400_BAD_REQUEST
+            ) 
+
+        except Exception as e:
+            return Response(
+                {"status": "error", "message": "Something went wrong, please try again later."},
+                status= status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class MessageView(APIView):
     """This will send over the current message history stored on the users chat to the server on opening the given chat."""
@@ -44,13 +70,13 @@ class MessageView(APIView):
         user = request.user
         data = request.query_params
 
-        chats = Chat.objects.filter(user= user, name= data.get("name"))
+        chats = Chat.objects.filter(user= user, room_name= data.get("room_name"))
 
         if chats.count() > 1:
-            return Response({"error": "More than 1 chats found."}, status= status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"status": "error", "message": "More than 1 chats found."}, status= status.HTTP_409_CONFLICT)
         
         if not chats.exists():
-            return Response({"error": "No chat records found"}, status= status.HTTP_404_NOT_FOUND)
+            return Response({"status": "ok", "message": "No chat records found", "data": []}, status= status.HTTP_200_OK)
         
         chat = chats.first()
         messages = Message.objects.filter(chat= chat).order_by('-timestamp')
@@ -58,9 +84,23 @@ class MessageView(APIView):
         paginator = ChatCursorPagination()
         result_page = paginator.paginate_queryset(messages, request)
 
-        serializer = MessageSerializer(messages, many= True)
-        return paginator.get_paginated_response(serializer.data)
-    
+        serializer = MessageSerializer(result_page, many= True)
+        paginated_data = paginator.get_paginated_response(serializer.data).data
+
+        return Response({"status": "ok", "data": paginated_data}, status= status.HTTP_200_OK)
+
+
+class GatekeeperLogs(APIView):
+    """Get function to get the logs... (No post because logs get created automatically and ideally are required to be unmodifiable)"""
+    def get(self, request):
+        pass
+        
+
+
+class ReviewGatekeeperLogs(APIView):
+    def get(self, request):
+        pass
+
 @csrf_exempt # To test ws upgrade
 def debug_headers_view(request):
     """

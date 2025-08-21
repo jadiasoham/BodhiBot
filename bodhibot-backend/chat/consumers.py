@@ -11,6 +11,61 @@ from .models import Chat, Message
 from collections import deque
 from django.conf import settings
 from urllib.parse import quote
+from random import choice
+
+CHAT_NAMES = [
+    "Quantum Banter",
+    "Pixel Pulse",
+    "Midnight Bytes",
+    "Neural Vibes",
+    "Echo Chamber",
+    "Cipher Sparks",
+    "Binary Horizon",
+    "Infinite Loop",
+    "Glitch Realm",
+    "Code & Chill",
+    "Retro Circuit",
+    "Async Dreams",
+    "Cosmic Buffer",
+    "Terminal Velocity",
+    "Neon Syntax",
+    "Coffee & Commits",
+    "Ghost in the Chat",
+    "Mind Over Matter",
+    "Recursive Reality",
+    "Data Storm",
+    "Signal Noise",
+    "Zero Day Talks",
+    "Warp Zone",
+    "Cloud Nine",
+    "Bug Hunters",
+    "Quantum Drift",
+    "Infinite Jest",
+    "Timeout Tavern",
+    "Byte-Sized Stories",
+    "Hashmap Hideout",
+    "Dark Mode Vibes",
+    "Overflow Cafe",
+    "Commit & Push",
+    "Ctrl Alt Belong",
+    "The Sandbox",
+    "Curious Codex",
+    "Hidden Kernel",
+    "AI After Hours",
+    "Off by One",
+    "Code Nebula",
+    "Cache Me If You Can",
+    "Deadlock Diaries",
+    "Undefined Legends",
+    "Packet Pirates",
+    "Syntax Samurai",
+    "Merge Conflict",
+    "Exception Alley",
+    "Lazy Eval Lounge",
+    "Segfault City",
+    "Parallel Universe",
+]
+
 
 User = get_user_model()
 
@@ -31,9 +86,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
         try:
             token = self.scope["query_string"].decode().split("=")[-1]
             self.user = await authenticate_token(token)
-
-            self.room_name = self.scope['url_route']['kwargs']['room_name']
-            print("This is the chat_title: ", quote(self.room_name), " which is actually: ", self.room_name)
+            params = self.scope['url_route']['kwargs']
+            if "room_name" in params:
+                self.room_name = params["room_name"]
+                self.chat_name = None
+            elif "chat_name" in params:
+                self.chat_name = params["chat_name"]
+                self.room_name = None
+            print(self.room_name)
+            print(self.chat_name)
+            # print("This is the chat_title: ", quote(self.room_name), " which is actually: ", self.room_name)
             self.room_group_name = f"chat_{quote(self.room_name)}"
             self.history = deque(maxlen= settings.CHAT_HISTORY_LEN)
             # Initially each element of self.history will contain all the fields returned by the message's serializer.
@@ -52,7 +114,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
             # Create a Chat object
             print("start a chat")
-            self.chat = await sync_to_async(start_a_chat)(username=self.user.username, chat_name=quote(self.room_name))
+            self.chat = await sync_to_async(start_a_chat)(username= self.user.username, room_name= self.room_name, chat_name= self.chat_name)
             print(str(self.chat))
             message_history = await sync_to_async(get_n_messages_in_chat)(self.chat, settings.CHAT_HISTORY_LEN)
             self.history.extend(message_history)
@@ -73,23 +135,23 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         data = json.loads(text_data)
         message = data.get("message", "")
-        # context = data.get("context", "")
         context = self.history
         summary = data.get("summary", "")
 
-        # Create a message object:
         print("got a message for bot!")
-        await sync_to_async(create_message)(chat=self.chat, sender=self.user.username, content=message)
-        # self.history.append({"sender": self.user.username, "content": message})
-        # print(self.history)
-
-
+        # breakpoint()
         # Celery task to generate the response
-        task = generate_response_task.delay(message, list(context), summary)
+        task = generate_response_task.delay(
+            self.chat.id, 
+            self.user.username,
+            message,
+            list(context),
+            summary,
+        )
 
         self.history.append({"sender": self.user.username, "content": message})
 
-        response = task.get(timeout= 90) # Wait atleast 90 seconds before breaking the pipe.
+        response = task.get(timeout= 150) # Wait atleast 90 seconds before breaking the pipe.
 
         bot_message_for_frontend = {
             'id': str(uuid.uuid4()), # Generate a unique ID for React's key prop
@@ -108,8 +170,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         # Record the response as a message object as well:
         print("bot has responded - sending to user...")
-        await sync_to_async(create_message)(chat= self.chat, sender= "BodhiBot", content= response)
+        await sync_to_async(create_message)(chat_id= self.chat.id, sender= "BodhiBot", content= response)
         self.history.append({"sender": "bodhibot", "content": response})
+
+        # Create a chat name:
+        if len(self.history) in (2, 4):
+            self.chat.name = choice(CHAT_NAMES)[:255]
+            await sync_to_async(self.chat.save)()
 
     async def chat_message(self, event):
         await self.send(text_data= json.dumps({

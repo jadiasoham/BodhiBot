@@ -1,0 +1,3 @@
+BLOCKED_WORDS = []
+
+BLOCKED_PHRASES = []

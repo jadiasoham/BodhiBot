@@ -40,7 +40,7 @@ def format_prompt_for_qwen(user_prompt, system_prompt=None, context=None, summar
 
     return messages
 
-def generate_response(model, tokenizer, formatted_prompt, device, max_length= 512):
+def generate_response(model, tokenizer, formatted_prompt, max_length= 512):
     """Generates a response from model using the provided formatted prompt."""
 
     text = tokenizer.apply_chat_template(
@@ -49,7 +49,7 @@ def generate_response(model, tokenizer, formatted_prompt, device, max_length= 51
         add_generation_prompt= True
     )
 
-    inputs = tokenizer([text], return_tensors= "pt", truncation= True, max_length= max_length, add_special_tokens= False).to(device)
+    inputs = tokenizer([text], return_tensors= "pt", truncation= True, max_length= max_length, add_special_tokens= False).to("cuda:0")
 
     output = model.generate(
         **inputs,

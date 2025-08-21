@@ -1,4 +1,4 @@
-from .models import Chat, Message
+from .models import Chat, Message, GatekeeperLogs, GatekeeperLogReview
 from rest_framework.serializers import ModelSerializer
 
 class ChatSerializer(ModelSerializer):
@@ -14,3 +14,16 @@ class MessageSerializer(ModelSerializer):
         model = Message
         fields = '__all__'
 
+
+class GatekeeperLogsSerializer(ModelSerializer):
+
+    class Meta:
+        model = GatekeeperLogs
+        fields = '__all__'
+
+
+class GatekeeperLogReview(ModelSerializer):
+
+    class Meta:
+        model = GatekeeperLogReview
+        fields = '__all__'
