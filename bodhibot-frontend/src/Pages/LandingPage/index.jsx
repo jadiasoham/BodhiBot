@@ -6,7 +6,6 @@ const LandingPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
 
-
   useEffect(() => {
     if (isAuthenticated) {
       navigate('/chats');
@@ -25,7 +24,7 @@ const LandingPage = () => {
               <img
                 src="BodhibotLogo.png"
                 alt="BodhiBot Illustration"
-                className="w-[500px] h-[500px] object-contain"
+                className="w-[500px] h-[auto] object-contain"
               />
             </div>
 
