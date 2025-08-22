@@ -30,6 +30,32 @@
   border-bottom: 1px solid #eee; /* You might want to adjust this border color */
 }
 
+/* Navigation Links */
+.nav-links {
+  display: flex;
+  gap: 15px; /* spacing between links */
+  align-items: center;
+}
+
+.nav-link {
+  text-decoration: none;
+  font-weight: 500;
+  color: var(--light-color); /* Light text by default on dark navbar */
+  transition: color 0.3s ease, border-bottom 0.3s ease;
+  padding: 6px 10px;
+  border-radius: 4px;
+}
+
+.nav-link:hover {
+  color: var(--accent-color); /* Teal on hover */
+  background-color: rgba(255, 255, 255, 0.1); /* subtle hover background */
+}
+
+.nav-link.active {
+  color: var(--secondary-color); /* Highlight active link with orange-red */
+  border-bottom: 2px solid var(--secondary-color);
+}
+
 .app-title {
   font-size: 20px;
   font-weight: bold;
