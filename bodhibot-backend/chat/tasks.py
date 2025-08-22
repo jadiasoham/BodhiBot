@@ -31,6 +31,7 @@ def generate_response_task(chat_id, sender, user_prompt, context= None, summary=
         
         # Create the message object:
         msg = create_message(chat_id= chat_id, sender= sender, content= user_prompt)
+        # breakpoint()
         
         # Now retrieve the message using serializer obj's id
         # msg_obj = Message.objects.get(id= msg.id)
@@ -45,6 +46,7 @@ def generate_response_task(chat_id, sender, user_prompt, context= None, summary=
         )
 
         blocked, reason = gk.run()
+        # breakpoint()
 
         if not blocked:
             system_prompt = settings.INFERENCE_SYSTEM_PROMPT

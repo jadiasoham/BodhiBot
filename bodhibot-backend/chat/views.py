@@ -71,7 +71,7 @@ class MessageView(APIView):
         user = request.user
         data = request.query_params
 
-        chats = Chat.objects.filter(user= user, room_name= data.get("room_name"))
+        chats = Chat.objects.filter(user= user, room_name= data.get("name"))
 
         if chats.count() > 1:
             return Response({"status": "error", "message": "More than 1 chats found."}, status= status.HTTP_409_CONFLICT)

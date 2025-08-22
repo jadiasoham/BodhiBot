@@ -86,17 +86,17 @@ class PolicyEnforcementLayer:
             tokenize= False,
             add_generation_prompt= True
         )
-
+        # real_tokenizer = getattr(self.tokenizer, "tokenizer", self.tokenizer)
         inputs = self.tokenizer([text], return_tensors= "pt", truncation= True,
-                        max_length= 1024, add_special_tokens= False).to(self.device)
+                        max_length= 2048, add_special_tokens= False).to(self.device)
         
         output = self.model.generate(
             **inputs,
             # attention_mask=inputs["attention_mask"],
             pad_token_id= self.tokenizer.eos_token_id,
-            do_sample=True,
-            top_p=0.5,
-            temperature=0.1,
+            do_sample=False,
+            # top_p=0.5,
+            # temperature=0.1,
             max_new_tokens=128,
             use_cache= False
         )

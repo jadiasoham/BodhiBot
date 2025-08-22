@@ -74,9 +74,9 @@ const ChatView = ({ chatName }) => {
 				},
 			});
 			console.log(res?.data)
-			const newMessages = res?.data?.data.reverse();
+			const newMessages = res?.data?.data?.results.reverse();
 			setMessages((prev) => [...newMessages, ...prev]);
-			setNextCursor(res.data.next?.split('cursor=')[1] || null);
+			setNextCursor(res?.data?.data?.next?.split('cursor=')[1] || null);
 		} catch (err) {
 			console.error('Failed to fetch messages:', err);
 		} finally {

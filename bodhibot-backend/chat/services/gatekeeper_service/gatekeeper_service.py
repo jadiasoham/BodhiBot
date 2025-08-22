@@ -42,6 +42,7 @@ class GatekeeperService:
             )
 
         for layer_name, layer in self.layers.items():
+            s = time.time()
             try:
                 curr_layer = layer(msg)
                 blocked, reason = curr_layer.run()
@@ -55,6 +56,8 @@ class GatekeeperService:
                 self.reason = reason
                 self.blocked_at = layer_name
                 break
+            e = time.time()
+            print(f"{layer_name} took {e - s:.3f} seconds to run.")
 
         end = time.time()
         print(f"Gatekeeper processed user input in {end - start:.3f} seconds.")

@@ -170,6 +170,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         # Record the response as a message object as well:
         print("bot has responded - sending to user...")
+        # breakpoint()
         await sync_to_async(create_message)(chat_id= self.chat.id, sender= "BodhiBot", content= response)
         self.history.append({"sender": "bodhibot", "content": response})
 
