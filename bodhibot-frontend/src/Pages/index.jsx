@@ -1,9 +1,10 @@
 import React from "react";
-import LandingPage from "./LandingPage"
-import ChatsPage from "./ChatsPage";
 import Layout from "../components/Layout";
 import { Route, Routes, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import LandingPage from "./LandingPage"
+import ChatsPage from "./ChatsPage";
+import PolicyViewPage from "./UsagePolicyPage";
 
 function ProtectedRoute({ element }) {
 	const { isAuthenticated } = useAuth();
@@ -28,6 +29,14 @@ function Pages() {
 							<ProtectedRoute element={<ChatsPage />} />
 						}
 					/>
+
+					<Route
+						path="/policy"
+						element= {
+							<ProtectedRoute element={<PolicyViewPage />} />
+						}
+					/>
+
 				</Routes>
 			</Layout>
 		</>
