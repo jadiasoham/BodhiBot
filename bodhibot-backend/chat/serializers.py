@@ -1,4 +1,4 @@
-from .models import Chat, Message, GatekeeperLogs, GatekeeperLogReview
+from .models import Chat, Message, GatekeeperLogs, GatekeeperLogReview, UsagePolicy
 from rest_framework.serializers import ModelSerializer
 
 class ChatSerializer(ModelSerializer):
@@ -26,4 +26,10 @@ class GatekeeperLogReview(ModelSerializer):
 
     class Meta:
         model = GatekeeperLogReview
+        fields = '__all__'
+
+class UsagePolicySerializer(ModelSerializer):
+
+    class Meta:
+        model = UsagePolicy
         fields = '__all__'

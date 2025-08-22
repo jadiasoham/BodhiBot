@@ -1,12 +1,13 @@
 from django.shortcuts import render
 from rest_framework.permissions import IsAuthenticated
+from .permissions import PolicyAccessPermissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from rest_framework import status
 from .paginators import ChatCursorPagination
-from .models import Chat, Message
-from .serializers import ChatSerializer, MessageSerializer
+from .models import Chat, Message, GatekeeperLogs, GatekeeperLogReview, UsagePolicy
+from .serializers import ChatSerializer, MessageSerializer, UsagePolicySerializer
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from urllib.parse import unquote
@@ -100,6 +101,34 @@ class GatekeeperLogs(APIView):
 class ReviewGatekeeperLogs(APIView):
     def get(self, request):
         pass
+
+class UsagePolicyView(APIView):
+    """Update and View the usage poilicy"""
+    permission_classes = [IsAuthenticated, PolicyAccessPermissions]
+
+    def get(self, request):
+        """Anyone can view policy"""
+        try:
+            policy = UsagePolicy.objects.filter().order_by("-updated_on").first()
+            serializer = UsagePolicySerializer(policy)
+            return Response({"policy": serializer.data}, status= status.HTTP_200_OK)
+        
+        except Exception as e:
+            print(e)
+            return Response({"message": "An error occurred"}, status= status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    def post(self, request):
+        data = request.data
+        try:
+            serializer = UsagePolicySerializer(data= data)
+            serializer.is_valid(raise_exception= True)
+            serializer.save()
+            return Response({"data": serializer.data}, status= status.HTTP_201_CREATED)
+        except ValidationError as e:
+            return Response({"error": e.detail}, status= status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            print(e)
+            return Response({"message": "some error"}, status= status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @csrf_exempt # To test ws upgrade
 def debug_headers_view(request):
