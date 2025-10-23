@@ -1,5 +1,6 @@
 import json
 from django.conf import settings
+import re
 
 def deserialize_messages_for_context(data):
     """
@@ -40,7 +41,7 @@ def format_prompt_for_qwen(user_prompt, system_prompt=None, context=None, summar
 
     return messages
 
-def generate_response(model, tokenizer, formatted_prompt, max_length= 512):
+def generate_response(model, tokenizer, formatted_prompt):
     """Generates a response from model using the provided formatted prompt."""
 
     text = tokenizer.apply_chat_template(
@@ -49,7 +50,7 @@ def generate_response(model, tokenizer, formatted_prompt, max_length= 512):
         add_generation_prompt= True
     )
 
-    inputs = tokenizer([text], return_tensors= "pt", truncation= True, max_length= max_length, add_special_tokens= False).to("cuda:0")
+    inputs = tokenizer([text], return_tensors= "pt", add_special_tokens= True).to("cuda:0")
 
     output = model.generate(
         **inputs,
@@ -62,6 +63,25 @@ def generate_response(model, tokenizer, formatted_prompt, max_length= 512):
 
     # Extract only the new tokens as the response
     new_tokens = output[0][inputs["input_ids"].shape[1]:]
-    response = tokenizer.decode(new_tokens, skip_special_tokens= True)
+    response = tokenizer.decode(new_tokens, skip_special_tokens= False)
 
-    return response
+    def split_analysis_response(text: str) -> tuple[str, str]:
+        # Extract analysis/thinking
+        analysis_match = re.search(
+            r"<\|channel\|>analysis<\|message\|>(.*?)<\|end\|>",
+            text,
+            re.DOTALL,
+        )
+        analysis = analysis_match.group(1).strip() if analysis_match else ""
+
+        # Extract final response — till <|return|> OR end of text
+        final_match = re.search(
+            r"<\|channel\|>final<\|message\|>(.*?)(?:<\|return\|>|$)",
+            text,
+            re.DOTALL,
+        )
+        final = final_match.group(1).strip() if final_match else ""
+
+        return (analysis, final)    
+
+    return split_analysis_response(response)

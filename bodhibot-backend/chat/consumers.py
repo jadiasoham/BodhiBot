@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 import uuid
 from channels.generic.websocket import AsyncWebsocketConsumer
-from .tasks import generate_response_task
+from .tasks import generate_response_task, fake_generate_response_task
 from .services.chat_service import create_message, start_a_chat, get_n_messages_in_chat
 from asgiref.sync import sync_to_async
 from rest_framework_simplejwt.tokens import AccessToken
@@ -141,38 +141,49 @@ class ChatConsumer(AsyncWebsocketConsumer):
         print("got a message for bot!")
         # breakpoint()
         # Celery task to generate the response
-        task = generate_response_task.delay(
+        # task = generate_response_task.delay(
+        #     self.chat.id, 
+        #     self.user.username,
+        #     message,
+        #     list(context),
+        #     summary,
+        #     self.room_group_name,
+        # )
+
+        task = fake_generate_response_task.delay(
             self.chat.id, 
             self.user.username,
             message,
             list(context),
             summary,
+            self.room_group_name,
         )
+
 
         self.history.append({"sender": self.user.username, "content": message})
 
-        response = task.get(timeout= 150) # Wait atleast 90 seconds before breaking the pipe.
+        # response = task.get(timeout= 150) # Wait atleast 90 seconds before breaking the pipe.
 
-        bot_message_for_frontend = {
-            'id': str(uuid.uuid4()), # Generate a unique ID for React's key prop
-            'content': response, # The actual text content
-            'sender': 'BodhiBot', # The sender for this message
-            'timestamp': datetime.now().isoformat() + 'Z' # Current timestamp
-        }
+        # bot_message_for_frontend = {
+        #     'id': str(uuid.uuid4()), # Generate a unique ID for React's key prop
+        #     'content': response, # The actual text content
+        #     'sender': 'BodhiBot', # The sender for this message
+        #     'timestamp': datetime.now().isoformat() + 'Z' # Current timestamp
+        # }
 
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                "type": "chat_message",
-                "message": bot_message_for_frontend
-            }
-        )
+        # await self.channel_layer.group_send(
+        #     self.room_group_name,
+        #     {
+        #         "type": "chat_message",
+        #         "message": bot_message_for_frontend
+        #     }
+        # )
 
         # Record the response as a message object as well:
-        print("bot has responded - sending to user...")
-        # breakpoint()
-        await sync_to_async(create_message)(chat_id= self.chat.id, sender= "BodhiBot", content= response)
-        self.history.append({"sender": "bodhibot", "content": response})
+        # print("bot has responded - sending to user...")
+        # # breakpoint()
+        # await sync_to_async(create_message)(chat_id= self.chat.id, sender= "BodhiBot", content= response)
+        # self.history.append({"sender": "bodhibot", "content": response})
 
         # Create a chat name:
         if len(self.history) in (2, 4):
@@ -184,6 +195,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
             "type": "chat.message",
             "message": event["message"]
         }))
+
+    async def update_history(self, event):
+        self.history.append(event['value'])
+        print(self.history)
 
 
 class MyConsumer(AsyncWebsocketConsumer):

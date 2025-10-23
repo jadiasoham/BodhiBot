@@ -19,7 +19,7 @@ class ModelManager:
         self.model_name = None
 
         # <-- Run once per instance -->
-        self.initialize()
+        # self.initialize()
 
     def load_model(self):
         try:
@@ -32,21 +32,21 @@ class ModelManager:
 
             if self.get_tokenizer:
                 tokenizer = AutoTokenizer.from_pretrained(self.model_path, trust_remote_code= True)
-                tokenizer.pad_token = tokenizer.eos_token
-                tokenizer.padding_side = "right"
+                # tokenizer.pad_token = tokenizer.eos_token
+                # tokenizer.padding_side = "right"
 
             if self.device:
                 model = AutoModelForCausalLM.from_pretrained(
                     self.model_path,
-                    torch_dtype= torch.bfloat16,
-                    trust_remote_code = True
+                    dtype= torch.bfloat16,
+                    # trust_remote_code = True
                 ).to(self.device).eval()
             else:
                 model = AutoModelForCausalLM.from_pretrained(
                     self.model_path, 
-                    torch_dtype= torch.bfloat16, 
+                    dtype= torch.bfloat16, 
                     device_map= "auto", 
-                    trust_remote_code= True
+                    # trust_remote_code= True
                 ).eval()
             
             self.model = model
@@ -75,11 +75,11 @@ class ModelManager:
 
 # Create Singleton-like instances of required models:
 # 1. The main LLM:
-inference_model = ModelManager(settings.INFERENCE_MODEL_PATH)
+inference_model = ModelManager("openai/gpt-oss-20b")
 
 # 2. The Detoxify Models (just for the sake of having all models here...)
-detox_original = Detoxify("original", device= "cuda:0")
-detox_unbiased = Detoxify("unbiased", device= "cuda:0")
+detox_original = Detoxify("original", device= "cpu")
+detox_unbiased = Detoxify("unbiased", device= "cpu")
 
 # 3. The Policy Enforcer mini LLM:
-policy_llm = ModelManager(settings.POLICY_ENFORMCEMENT_MODEL_PATH)
+# policy_llm = ModelManager(settings.POLICY_ENFORMCEMENT_MODEL_PATH)
